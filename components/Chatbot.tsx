@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 import type { ChatMessage, AppState } from '../types';
 
-const API_KEY = "AIzaSyB1cKJ_ZyLPWwawnK-vjYWlqMritRu67d0";
-
 interface ChatbotProps {
     appState: AppState;
 }
@@ -20,7 +18,13 @@ const Chatbot: React.FC<ChatbotProps> = ({ appState }) => {
 
     useEffect(() => {
         const initChat = () => {
-            const ai = new GoogleGenAI({ apiKey: API_KEY });
+            if (!process.env.API_KEY) {
+                console.error("Chatbot disabled: API_KEY is not set.");
+                setMessages([{ role: 'model', text: 'Hello! The chatbot is currently disabled due to a configuration issue.' }]);
+                return;
+            }
+
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const chatSession = ai.chats.create({
                 model: 'gemini-2.5-flash',
                 config: {
@@ -135,10 +139,10 @@ const Chatbot: React.FC<ChatbotProps> = ({ appState }) => {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask me anything..."
-                                disabled={isLoading}
+                                disabled={isLoading || !chat}
                                 className="w-full p-3 bg-transparent border-none rounded-lg focus:ring-0 text-text-main"
                             />
-                            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 text-brand-light hover:text-white disabled:text-gray-500">
+                            <button type="submit" disabled={isLoading || !input.trim() || !chat} className="p-3 text-brand-light hover:text-white disabled:text-gray-500">
                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd"></path></svg>
                             </button>
                         </div>

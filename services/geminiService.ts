@@ -1,9 +1,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { CareerRecommendation, SkillGapAnalysis, LearningPath, FutureOutlook, UserProfile, JobPosting, Source } from '../types';
 
-const API_KEY = "AIzaSyB1cKJ_ZyLPWwawnK-vjYWlqMritRu67d0";
+if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable is not set");
+}
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export interface JobRecommendationResult {
     postings: JobPosting[];
